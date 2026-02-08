@@ -164,66 +164,117 @@ def daily_climograph_trend_analysis(date='annual',city='all',stationID='',years=
         while stop!=1: #stop after analyzing the last city
             logger.info('Pulling Daily Max File')
             file=daily_max_file_find(currentDir,stationID,base) #find the name of the daily max file
+            logger.info('Cleaning Daily Max Database')
             csv=daily_csv_importer(currentDir,file,years,base) #pull csv for the given station
             if date=='annual': #for the full year
+                logger.info('Analyzing For the Full Year')
                 months=range(1,13) #create iterative list for months
                 for month in months: #for each month
+                    logger.info('Analyzing Month %i'%month)
                     days=month_day_range(month) #create iterative list for days
                     for day in days: #for each day in month
+                        logger.info('Analyzing Day %i'&day)
                         if quantity=='all': #for all quantities
                             for Tau in quantityList: #go through each quantity
+                                logger.info('Analyzing Quantity %s'%Tau)
+                                logger.info('Creating Climograph')
                                 daily_climograph(file,csv,Tau,month,day,currentDir,base,save=save_plots,display=display_plots)
+                                logger.info('Creating Histogram')
                                 avg,std,skew=daily_histogram_grapher(file,csv,Tau,month,day,currentDir,base,save=save_plots,display=display_plots)
+                                logger.info('Creating Theoretical Histogram')
                                 daily_theoretical_histogram(avg,std,skew,file,Tau,month,day,currentDir,base,save=save_plots,display=display_plots)
+                                logger.info('Done with %s'%Tau)
+                        
                         else: #for one quantity
+                            logger.info('Analyzing Quantity %s'%quantity)
+                            logger.info('Creating Climograph')
                             daily_climograph(file,csv,quantity,month,day,currentDir,base,save=save_plots,display=display_plots)
+                            logger.info('Creating Histogram')
                             avg,std,skew=daily_histogram_grapher(file,csv,quantity,month,day,currentDir,base,save=save_plots,display=display_plots)
+                            logger.info('Creating Theoretical Histogram')
                             daily_theoretical_histogram(avg,std,skew,file,quantity,month,day,currentDir,base,save=save_plots,display=display_plots)
-            
+                        logger.info('Done with %i - %i'%(month,day))
             else: #for a singular date
                 if quantity=='all': #for all quantities
                     for Tau in quantity: #go through each quantity
+                        logger.info('Analyzing Quantity %s'%Tau)
+                        logger.info('Creating Climograph')
                         daily_climograph(file,csv,Tau,date[0],date[1],currentDir,base,save=save_plots,display=display_plots)
+                        logger.info('Creating Histogram')
                         avg,std,skew=daily_histogram_grapher(file,csv,Tau,date[0],date[1],currentDir,base,save=save_plots,display=display_plots)
+                        logger.info('Creating Theoretical Histogram')
                         daily_theoretical_histogram(avg,std,skew,file,Tau,date[0],date[1],currentDir,base,save=save_plots,display=display_plots)
-                        
+                        logger.info('Done with %s'%Tau)
                 else: #for one quantity
+                    logger.info('Creating Climograph')
                     daily_climograph(file,csv,quantity,date[0],date[1],currentDir,base,save=save_plots,display=display_plots)
+                    logger.info('Creating Histogram')
                     avg,std,skew=daily_histogram_grapher(file,csv,quantity,date[0],date[1],currentDir,base,save=save_plots,display=display_plots)
+                    logger.info('Creating Theoretical Histogram')
                     daily_theoretical_histogram(avg,std,skew,file,quantity,date[0],date[1],currentDir,base,save=save_plots,display=display_plots)
-                    
-            if currentCity==stopCity: stop=1
-            else: currentCity,currentDir,stationID,stopCity=progress_controller_climograph(checkpoint='checkpoint.csv',update=True,city=currentCity,base=base)#pull the  information for the next city
+                    logger.info('Done')
+            if currentCity==stopCity: 
+                stop=1
+                logger.info('Done with city: %s station %s'%(currentCity,stationID))
+                logger.info('Done with Analysis')
+            else:
+                logger.info('Done with city: %s station %s'%(currentCity,stationID))
+                currentCity,currentDir,stationID,stopCity=progress_controller_climograph(checkpoint='checkpoint.csv',update=True,city=currentCity,base=base)#pull the  information for the next city
+                logger.info('Analyzing city: %s station %s'%(currentCity,stationID))
     
     else: #for a singular city
+        currentDir=currentCity+'\\'+stationID+'\\'#record directory
+        logger.info('Checking directory %s'%currentDir)
+        logger.info('Pulling Daily Max File')
         file=daily_max_file_find(currentDir,stationID,base) #find the name of the daily max file
+        logger.info('Cleaning Daily Max Database')
         csv=daily_csv_importer(currentDir,file,years,base) #pull csv for the given station
         if date=='annual': #for the full year
+            logger.info('Analyzing For the Full Year')
             months=range(1,13) #create iterative list for months
             for month in months: #for each month
+                logger.info('Analyzing Month %i'%month)
                 days=month_day_range(month) #create iteratiive list for days
                 for day in days: #for each day in month
+                    logger.info('Analyzing Day %i'&day)
                     if quantity=='all': #for all quantities
                         for Tau in quantity: #go through each quantity
+                            logger.info('Analyzing Quantity %s'%Tau)
+                            logger.info('Creating Climograph')
                             daily_climograph(file,csv,Tau,month,day,currentDir,base,save=save_plots,display=display_plots)
+                            logger.info('Creating Histogram')
                             avg,std,skew=daily_histogram_grapher(file,csv,Tau,month,day,currentDir,base,save=save_plots,display=display_plots)
+                            logger.info('Creating Theoretical Histogram')
                             daily_theoretical_histogram(avg,std,skew,file,Tau,month,day,currentDir,base,save=save_plots,display=display_plots)
+                            logger.info('Done with %s'%Tau)
                     else: #for one quantity
+                        logger.info('Analyzing Quantity %s'%quantity)
+                        logger.info('Creating Climograph')
                         daily_climograph(file,csv,quantity,month,currentDir,base,save=save_plots,display=display_plots)
+                        logger.info('Creating Histogram')
                         avg,std,skew=daily_histogram_grapher(file,csv,quantity,month,day,currentDir,base,save=save_plots,display=display_plots)
+                        logger.info('Creating Theoretical Histogram')
                         daily_theoretical_histogram(avg,std,skew,file,quantity,month,day,currentDir,base,save=save_plots,display=display_plots)
-    
+                    logger.info('Done with %i - %i'%(month,day))
         else: #fr a singular date
             if quantity=='all': #for all quantities
                 for Tau in quantity: #go through each quantity
+                    logger.info('Analyzing Quantity %s'%Tau)
+                    logger.info('Creating Climograph')
                     daily_climograph(file,csv,Tau,date[0],date[1],currentDir,base,save=save_plots,display=display_plots)
+                    logger.info('Creating Histogram')
                     avg,std,skew=daily_histogram_grapher(file,csv,Tau,date[0],date[1],currentDir,base,save=save_plots,display=display_plots)
+                    logger.info('Creating Theoretical Histogram')
                     daily_theoretical_histogram(avg,std,skew,file,Tau,date[0],date[1],currentDir,base,save=save_plots,display=display_plots)
-                    
+                    logger.info('Done with %s'%Tau)
             else: #for one quantity 
+                logger.info('Creating Climograph')
                 daily_climograph(file,csv,quantity,date[0],date[1],currentDir,base,save=save_plots,display=display_plots)
+                logger.info('Creating Histogram')
                 avg,std,skew=daily_histogram_grapher(file,csv,quantity,date[0],date[1],currentDir,base,save=save_plots,display=display_plots)
+                logger.info('Creating Theoretical Histogram')
                 daily_theoretical_histogram(avg,std,skew,file,quantity,date[0],date[1],currentDir,base,save=save_plots,display=display_plots)
+                logger.info('Done')
     return
 
 
