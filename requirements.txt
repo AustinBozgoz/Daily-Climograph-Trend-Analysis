@@ -1,0 +1,6 @@
+#This script needs the following packages to run:
+pandas==2.2.3
+numpy==2.2.6
+Metpy==1.7.1
+matplotlib==3.10.3
+scipy==1.15.2
