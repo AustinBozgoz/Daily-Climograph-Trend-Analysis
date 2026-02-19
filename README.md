@@ -30,7 +30,7 @@ Theoretical Histogram generation: Alongside a timeseries graph for each calendar
     
 HIstogram value at percentile: An unused function within the daily_climograph_trend_analysis module will take the theoretical histogram inputs (avg,std,skew of the extrapolated normal distribution) and a random number between 0 and 1 to return the value of the histogram associated with that percentile. This has applications in monte-carlo simulations that have a dependence of synoptic values for a given calendar day and has been applied to other projects that utilize the rest of this script.
 
-Modular Design: Every major Step of the ETL pipeline is seperated into a different script and outputs its transformation into a seperate and meticulously labelled database. This allows for versatility of use for this project not only to find extreme heat values but to also utilize daily maximum values from any city within the LCD database. The error correction function is also cleanly seperated as a standalone function, allowing for any future programmer to easily clean and utilize the LCD database for any project.
+Modular Design: Every major step of the ETL pipeline is seperated into a different script and outputs its transformation into a seperate and meticulously labelled database. This allows for versatility of use for this project not only to find extreme heat values but to also utilize daily maximum values from any city within the LCD database. The error correction function is also cleanly seperated as a standalone function, allowing for any future programmer to easily clean and utilize the LCD database for any project.
 
 Unit Based Calculations: Incorporated metpy in order to ensure consistent use of fahrenheit for all heat-index related calculations
 
