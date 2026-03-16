@@ -45,9 +45,9 @@ This program operates in a 3 step sequence as directed by user input:
    * Can also convert all cities located within the NOAA_LCD_CSVs folder, in which case an extra file titled checkpoint.csv is saved to prevent redoing completed cities if the process is interrupted
 3) Organizes daily maximums/averages by calendar day to create timeseries graphs and histograms of synoptic values
    * All plots are saved within the directories for their respective cities, in a folder called climographs
-   * The statistical features (average, skewness, etc.) for the plots are saved within a seperate folder within NOAA_LCD_CSVs called city logs. The distributions of all cities are saved within csvs and sql databases for easy comparison to one another
-   * Specific ranges for analysis can be defined, like only examining information between june and august, or only for a specific year range
-
+   * Creates a timeseries plot to show how the daily value changes over the years. Plots a line of best fit over the timeseries and displays values related to the LOBF, including the p-value for the fit. The alternative hypothesis for the linear regression analysis is that the slope is nonzero.
+   * Creates a histogram of the values to show the occurance for each value.
+   * The statistical features (average, skewness, standard deviation) for the histogram are then used to create a theoretical histogram describing the range and probability of occurance for a particular synoptic value. This estimation obviously assumes the synoptic value is constant with time
 
 # Project Architecture:
 
