@@ -2,6 +2,10 @@
 
 Standalone program for creating and analyzing climographs for any day of the calendar year using historical synoptic data from the National Oceanic and Atmospheric Administration's (NOAA's) Local Climatological Database (LCD). By borrowing modules from the LCD-Daily-Max-Avg-Downloader-and-Converter repository, it both downloads and operates as a robust ETL (extract, transform, load) pipeline for converting long-term hourly weather data into daily maximum/average quantities useful for atmospheric inquiries. These quantities are then displayed in a time series and histogram based on a selected calendar day. This is useful for determining the range of the synoptic values a city experiences for a particular day, as well as if those values have changed substantially with time. The statistical analysis performs best if given at least 30 years of data for a particular station, though obviously is more accurate if given an even larger span of time.
 
+Based on the statistical and computational analysis from my thesis:  
+Bozgoz, Austin.  *Novel Metrics for Analyzing Extreme Heat Patterns across US Cities* . N.p., 2024. Print.  
+https://github.com/AustinBozgoz/Novel-Metrics-for-Analyzing-Extreme-Heat-Patterns-Across-US-Cities-/
+
 # Technical Information:
 
 Language: Python 3.11+
