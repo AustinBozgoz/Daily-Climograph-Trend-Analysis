@@ -27,7 +27,7 @@ Visualize: Matplotlib generates timeseries and histograms. NumPy and SciPy perfo
 # Getting Started
 
 ## Clone the repo
-git clone https://github.com/AustinBozgoz/LCD-Daily-Max-Avg-Downloader-and-Converter
+git clone https://github.com/AustinBozgoz/Daily-Climograph-Trend-Analysis
 
 ## Install dependencies
 pip install -r requirements.txt
@@ -55,15 +55,11 @@ This program operates in a 3 step sequence as directed by user input:
 
 # Project Architecture:
 
-Data Input: Reads raw csv's from NOAA's LCD database (https://www.ncdc.noaa.gov/cdo-web/datatools/lcd). The database only permits data downloading one decade at a time, so you must download the information each decade starting at January 1st at the beginning of the decade (or whenever the sation first started collecting information) to the last day in the decade (as in December 31st, the 9th year of the decade). E.g. for the 1980s of a particular station, the csv should be dated from January 1st, 1980 to December 31st, 1989. If the station started in 1985, it is also acceptable to use a csv of [Any month] [Any day], 1985 to December 31st, 1989. Manual Adjustments to the code will need to be made in order to include csv's of more recent years (i.e. past 2019).
+Data Acquisition: Downloads Hourly CSV data from NOAAs LCD database (https://www.ncdc.noaa.gov/cdo-web/datatools/lcd) using their RESTful API. The user provides an 11-digit station identifier (see Operation section for instructions on how to find the station identifier), the city of the station, and a 3-letter station ID. Hourly data is stored within csvs covering 10-year periods, and is saved in the same folder as the scripts within a directory called NOAA_LCD_CSVs.
 
-Data Formating: LCD data files should be saved in csv file extension and organized within a directory labelled NOAA_LCD_CSVs, saved within the source file. Within that folder should be another directory with the name of the city, and within that should be a 3 letter designation for the station the data was taken from, followed by a space and the letters LCD. Within that directory thee csv files should be saved as the 3 letter station ID_LCD_the starting year-the ending year for that batch of data. For example, the LCD data for Miami, Florida (station ID MIA) from 1980-1989 should be saved within the same directory as the source files as NOAA_LCD_CSVs/Miami, FL/ MIA LCD/MIA_LCD_1980-1989.csv  
+Data Input: Reads raw csv's of hourly station data. Checks entries for missing entries or nonnumerical characters, and then finds the average or maximum of daily values. Calculates heat index and wetbulb temperature using drybulb temperature and humidity readings. Stores the calculated values of each day in a csv labelled daily max within the respective LCD folder.
 
-Error Correction: Checks hourly readings and removes letters from entries, ignores blank entries, checks that values are reasonable (e.g. temperature is not in the thousands of degrees)
-
-Processing: Uses MetPy for unit-aware calculations (e.g. Heat Index) and Scipy for probability distribution plot analysis as well as outlier detection.
-
-Output: Generates cleaned data, turning hourly readings of daily maximum/average temperature, heat index, wet-bulb temperature, relative humidity; seperates that data based on calendar day to create a time series graph and a histogram graph for each data type. The time series graphs also include a line of best fit along with a p-value describing an alternate hypothesis of a non-zero slope.
+Data Analysis: Organizes daily max/avg values by calendar day to plot timeseries and histograms of synoptic values. Creates a timeseries plot to show how the daily value changes over the years. Plots a line of best fit over the timeseries and displays values related to the LOBF, including the p-value for the fit. The alternative hypothesis for the linear regression analysis is that the slope is nonzero. Creates a histogram of the values to show the occurance for each value.
 
 # Key Features:
 
@@ -83,8 +79,7 @@ Resilence: Implemeneted a global logging system in order to track which csv's or
 
 Performance: Implemeneted a combination of numpy vectorization and standard python loops in order to optimize performance of high-volume datasets and ensure accuracy of calculations.
 
-# Clone the repo
-git clone https://github.com/AustinBozgoz/Daily-Climograph-Trend-Analysis
+
 
 # Install dependencies
 pip install -r requirements.txt
