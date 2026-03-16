@@ -13,7 +13,9 @@ import time
 import os
 import logging
 
+
 logger = logging.getLogger(__name__)
+np.seterr(all='ignore') #tell numpy to ignore all runtime error printouts, which is bound to occur a lot given the volume of calculations
 
 
 
@@ -27,26 +29,27 @@ def pd_index(database,column,status):#returns the first index in a column with a
         else: i+=1#otherwise cycle entries
     return i #return index
 
-def progress_controller(checkpoint='checkpoint.csv',update=False,city=None,base=None): #manages the checkpoint file and returns entries needed to operate the LCD file program
-    ##load checkpoint file    
-    masterFile=pd.read_csv(base+checkpoint)
+def progress_controller(checkpoint='checkpoint.csv',update=False,city=None,base=None,oneCity=False,oneStation=False): #manages the checkpoint file and returns entries needed to operate the LCD file program
+    if oneCity==False:
+        ##load checkpoint file    
+        masterFile=pd.read_csv(base+checkpoint)
     
-    ##update list
-    if update==True:#if we've completed a city
-        print('completed city %s'%city) #print that
-        completedIndex=pd_index(masterFile,'dirNames',city) #locate city in checkpoint
-        masterFile.loc[completedIndex,'status']=1 #record it's completion
-        masterFile.to_csv(base+checkpoint)#save updated masterfile
+        ##update list
+        if update==True:#if we've completed a city
+            print('completed city %s'%city) #print that
+            completedIndex=pd_index(masterFile,'dirNames',city) #locate city in checkpoint
+            masterFile.loc[completedIndex,'status']=1 #record it's completion
+            masterFile.to_csv(base+checkpoint)#save updated masterfile
     
-    ##find info on next city
-    nextIndex=pd_index(masterFile,'status',0) #find next city in checkpoint
-    currentCity=masterFile['dirNames'][nextIndex] #record the city name/1st directory
-    stationID=masterFile['stationIDs'][nextIndex]
-    if currentCity=='MIA second try':
-        currentDir=currentCity+'\\'
-        stationID='MIA'
+        ##find info on next city
+        nextIndex=pd_index(masterFile,'status',0) #find next city in checkpoint
+        currentCity=masterFile['dirNames'][nextIndex] #record the city name/1st directory
+        stationID=masterFile['stationIDs'][nextIndex]
+        
     else:
-        currentDir=currentCity+'\\'+stationID+'\\'#record directory
+        currentCity=oneCity
+        stationID=oneStation+' LCD'
+    currentDir=currentCity+'\\'+stationID+'\\'#record directory
     
     ###>write file names
     fileNames,startYears,endYears=[],[],[]
@@ -57,7 +60,8 @@ def progress_controller(checkpoint='checkpoint.csv',update=False,city=None,base=
                 startYears.append(item[8:12])
                 endYears.append(item[8:11]+'9')
     
-    stopCity=masterFile['dirNames'].iloc[-1]
+    if oneCity==False:stopCity=masterFile['dirNames'].iloc[-1]
+    else: stopCity=0
     return currentCity,currentDir,stationID,fileNames,startYears,endYears,stopCity
 
 
@@ -95,7 +99,7 @@ def entry_parser_LCD(entry):#LCD data contains some random letters in entries, t
          if entry.isnumeric()==False:#if the string contains a letter
              result=''#create a product array (str) that gets built
              for k in range(len(entry)):#parse each value in the entry
-                 if (entry[k].isnumeric==True) or (entry[k]=='.'):#only record numbers
+                 if (entry[k].isnumeric()==True) or (entry[k]=='.'):#only record numbers
                      result+=entry[k]
              if result=='':#if nothing gets recorded (it's not a not numerical entry)
                  return 'M' #record missing value
@@ -144,7 +148,7 @@ def daily_max(data,date,RHavgall):#returns daily results as a list in with T/RH/
         
         #if all values are missing or errored and somehow don't get changed before this, change it
         for i in range(len(dailyResults)):
-            if dailyResults[i]==-1000:dailyResults[i]='M'
+            if dailyResults[i]==0:dailyResults[i]='M'
     
     return dailyResults,RHavgall
    
@@ -189,11 +193,12 @@ def LCD_analyze(currentDir,fileNames,endYears,currentProduct,RHavgall):#returns 
     
 
 
-def LCD_hourly_daily_max(base):
+def LCD_hourly_daily_max(base,oneCity=False,oneStation=False):
     logger.info('Beginning LCD Analysis')
     stop,update,city=0,False,0#set up variables for initial run
     while stop==0:
-        currentCity,currentDir,currentStation,fileNames,startYears,endYears,stopCity=progress_controller(update=update,city=city,base=base)#pull all variables needed to analyze this city
+        currentCity,currentDir,currentStation,fileNames,startYears,endYears,stopCity=progress_controller(update=update,city=city,base=base,oneCity=oneCity,oneStation=oneStation)#pull all variables needed to analyze this city
+        if oneCity!=False:stopCity=oneCity
         logger.info('Analyzing City: %s'%currentCity)
 
         currentProduct=HV_csv(startYears,endYears)#create the blank csv
@@ -217,6 +222,3 @@ def LCD_hourly_daily_max(base):
     logger.info('Done With LCD Analysis')
     return
 
-base='C:\\Users\\Austin\\OneDrive\\Documents\\resumes and transcripts\\masters project code\\NOAA_LCD_CSVs\\'
-
-LCD_hourly_daily_max(base)
