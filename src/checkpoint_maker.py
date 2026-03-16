@@ -39,7 +39,7 @@ def checkpoint_maker(function,base):
                 instructions=[1,'null']
             elif 'graphs' in function:
                 instructions=['null',1]
-        product=pd.read_csv('checkpoint.csv')
+        product=pd.read_csv(base+'checkpoint.csv')
         for i in range(len(product)):
             if instructions[0]!='null':
                 product.loc[i,'status']=instructions[0]
@@ -49,8 +49,3 @@ def checkpoint_maker(function,base):
     product.to_csv(base+'checkpoint.csv')
     logger.info('Checkpoint Complete')
     return 
-
-base='C:\\Users\\Austin\\OneDrive\\Documents\\resumes and transcripts\\masters project code\\NOAA_LCD_CSVs\\'
-function='new'
-checkpoint_maker(function,base)
-#function='new' #choices include new (new checkpoint spreadsheet),clear/fill status/graph/both (reset/fill status or graph columns or both)
