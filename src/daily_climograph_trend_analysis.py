@@ -24,11 +24,13 @@ def daily_csv_importer(LCD_path,file,years='all',base=''):#imports and prepares 
     return csv
 
 def daily_climograph(file,csv,quantity,month,day,LCD_path,base='',save=False,display=True): #Must be run before the other climograph functions. Creates a time series climograph of a station for a given day of the year, returns a line of best fit (with time as the independent value) and the probability that the graph is actually constant (determined by the p-value)
-    y=csv[(csv['Date'].dt.month==month)&(csv['Date'].dt.day==day)&(csv[quantity]!=0)].dropna(subset=[quantity]) #pulls the data for the chosen month and day
+    y=csv[(csv['Date'].dt.month==month)&(csv['Date'].dt.day==day)&(csv[quantity]!=0)&(csv[quantity]!='M')].dropna(subset=[quantity]) #pulls the data for the chosen month and day
     x=y['Date'].dt.year #prepares the yearly values as the independent variable
     
+    
+    indVar=[float(i) for i in y[quantity].tolist() ]
     #linear regression
-    m, b, r, p, se = linregress(x.tolist(), y[quantity].tolist(),alternative='two-sided') #two sided dictates that the alt. hypothesis is that the slope is nonzero (i.e. the dependent value changes with time)
+    m, b, r, p, se = linregress(x.tolist(), indVar,alternative='two-sided') #two sided dictates that the alt. hypothesis is that the slope is nonzero (i.e. the dependent value changes with time)
     linepts=np.linspace(min(x),max(x)) #independent values for the line of best fit
     linedep=m*linepts+b #dependent values for the line of best fit
     #the returned values include slope (m), intercept (b), r value between the two values (r), p value describing evidence for the null hypothesis (p), standard error for the estimated slope (se)
@@ -39,7 +41,7 @@ def daily_climograph(file,csv,quantity,month,day,LCD_path,base='',save=False,dis
     #plot
     fig=plt.figure()
     plt.title(title)
-    plt.plot(x,y[quantity],marker='o',ls='none') #plot actual data values
+    plt.plot(x,indVar,marker='o',ls='none') #plot actual data values
     if 'RH' in quantity:plt.ylabel(quantity)
     else:plt.ylabel(quantity+r' ($^o$f)')
     plt.xlabel('m:%.3f b:%.3f r:%.3f p:%.3f se:%.3f'%(m,b,r,p,se))
@@ -53,27 +55,28 @@ def daily_climograph(file,csv,quantity,month,day,LCD_path,base='',save=False,dis
 
 def daily_histogram_grapher(file,csv,quantity,month,day,LCD_path,base='',save=False,display=True): #creates a histogram climograph of a station for a given day of the year, returns the average, stddev, and skew values for the histogram. 
     #These returned values make the assumption that the values are independent of time, and therefore if the p-value from the timeseries histograph is less than 0.05, these values and the subsequent theoretical histogram are not viable for use in analysis
-    y=csv[(csv['Date'].dt.month==month)&(csv['Date'].dt.day==day)&(csv[quantity]!=0)].dropna(subset=[quantity]) #pulls the data for the chosen month and day
+    y=csv[(csv['Date'].dt.month==month)&(csv['Date'].dt.day==day)&(csv[quantity]!=0)&(csv[quantity]!='M')].dropna(subset=[quantity]) #pulls the data for the chosen month and day
     x=y['Date'].dt.year #prepares the yearly values as the independent variable
+    values=[float(i) for i in y[quantity].tolist()]
     
     #histogram grapher
-    TauMin=min(y[quantity])#record ranges
-    TauMax=max(y[quantity])
-    bins=np.arange(int(TauMin),int(TauMax),1)#create bins with length=1
+    TauMin=min(values)#record ranges
+    TauMax=max(values)
+    bins=np.arange(int(float(TauMin)),int(float(TauMax)),1)#create bins with length=1
     
     title=file[0:-4]+' of '+quantity+' for '+str(month)+'-'+str(day)
     
     #plot
     fig=plt.figure(figsize=(10,6))
     plt.title(title)
-    plt.hist(y[quantity],density=True,bins=bins,color='black')#plot data values
+    plt.hist(values,density=True,bins=bins,color='black')#plot data values
     plt.ylabel('Probabilty')
     if 'RH' in quantity:plt.xlabel(quantity)
     else:plt.xlabel(quantity+r' ($^o$f)')
     if display==True:plt.show()
     
     
-    avg,std,skew=np.average(y[quantity]),np.std(y[quantity]),stats.skew(y[quantity]) #find values used to reproduce the histogram
+    avg,std,skew=np.average(values),np.std(values),stats.skew(values) #find values used to reproduce the histogram
     if save==True:fig.savefig(base+LCD_path+'climographs\\'+title+' histogram') #save histogram
     return avg,std,skew
 
@@ -173,7 +176,8 @@ def daily_climograph_trend_analysis(date='annual',city='all',stationID='',years=
                     logger.info('Analyzing Month %i'%month)
                     days=month_day_range(month) #create iterative list for days
                     for day in days: #for each day in month
-                        logger.info('Analyzing Day %i'&day)
+                        logger.info('Analyzing Day %i'%day)
+                        print('Analyzing for %s on %s %s'%(currentCity,month,day))
                         if quantity=='all': #for all quantities
                             for Tau in quantityList: #go through each quantity
                                 logger.info('Analyzing Quantity %s'%Tau)
@@ -196,7 +200,7 @@ def daily_climograph_trend_analysis(date='annual',city='all',stationID='',years=
                         logger.info('Done with %i - %i'%(month,day))
             else: #for a singular date
                 if quantity=='all': #for all quantities
-                    for Tau in quantity: #go through each quantity
+                    for Tau in quantityList: #go through each quantity
                         logger.info('Analyzing Quantity %s'%Tau)
                         logger.info('Creating Climograph')
                         daily_climograph(file,csv,Tau,date[0],date[1],currentDir,base,save=save_plots,display=display_plots)
@@ -223,6 +227,7 @@ def daily_climograph_trend_analysis(date='annual',city='all',stationID='',years=
                 logger.info('Analyzing city: %s station %s'%(currentCity,stationID))
     
     else: #for a singular city
+        currentCity=city
         currentDir=currentCity+'\\'+stationID+'\\'#record directory
         logger.info('Checking directory %s'%currentDir)
         logger.info('Pulling Daily Max File')
@@ -237,8 +242,9 @@ def daily_climograph_trend_analysis(date='annual',city='all',stationID='',years=
                 days=month_day_range(month) #create iteratiive list for days
                 for day in days: #for each day in month
                     logger.info('Analyzing Day %i'&day)
+                    print('Analyzing for %s on %s %s'%(currentCity,month,day))
                     if quantity=='all': #for all quantities
-                        for Tau in quantity: #go through each quantity
+                        for Tau in quantityList: #go through each quantity
                             logger.info('Analyzing Quantity %s'%Tau)
                             logger.info('Creating Climograph')
                             daily_climograph(file,csv,Tau,month,day,currentDir,base,save=save_plots,display=display_plots)
@@ -258,7 +264,7 @@ def daily_climograph_trend_analysis(date='annual',city='all',stationID='',years=
                     logger.info('Done with %i - %i'%(month,day))
         else: #fr a singular date
             if quantity=='all': #for all quantities
-                for Tau in quantity: #go through each quantity
+                for Tau in quantityList: #go through each quantity
                     logger.info('Analyzing Quantity %s'%Tau)
                     logger.info('Creating Climograph')
                     daily_climograph(file,csv,Tau,date[0],date[1],currentDir,base,save=save_plots,display=display_plots)
